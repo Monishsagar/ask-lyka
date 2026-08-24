@@ -5,11 +5,44 @@ export function retrieve(question: string): Retrieval {
   if (policy.test(question)) return { records: [], outcome: 'DECLINED_OUT_OF_POLICY', reason: 'question asks for advice or a field not present in the schema.' }
   const q = question.toLowerCase()
   const allProjects = [...new Set(listings.map(x => x.project))]
+
+  // Step 1: exact full project name match (case-insensitive)
   const explicitProjects = allProjects.filter(p => q.includes(p.toLowerCase()))
-  const projects = explicitProjects.length ? explicitProjects : allProjects.filter(p => p.toLowerCase().split(' ').some(w => w.length > 3 && q.includes(w)))
+
+  // Step 2: word-level fallback — only use when no exact match found.
+  // A word must UNIQUELY identify ONE project to be trusted; if it matches
+  // multiple projects (e.g. "marina" → Bay, Heights, Heights) we treat it as
+  // ambiguous rather than guessing. Words shorter than 5 chars are too generic.
+  let projects: string[]
+  if (explicitProjects.length) {
+    projects = explicitProjects
+  } else {
+    const wordMatches = allProjects.filter(p =>
+      p.toLowerCase().split(' ').some(w => w.length >= 5 && q.includes(w))
+    )
+    // Only use the word-fallback when it narrows to a single unambiguous project
+    projects = wordMatches.length === 1 ? wordMatches : []
+  }
+
+  // Step 3: Guard against wrong-project unit matches.
+  // Collect all meaningful words that appear in ANY known project name.
+  // If the query contains one of those words but projects resolved to empty,
+  // the user is referencing a project that either doesn't exist ("Marina mall")
+  // or is ambiguous. Either way, do NOT fall through to a unit-only search
+  // that would silently match the wrong project.
+  const projectVocab = new Set(
+    allProjects.flatMap(p => p.toLowerCase().split(' ').filter(w => w.length >= 4))
+  )
+  const queryWords = q.split(/\W+/).filter(Boolean)
+  const hasProjectHintWord = queryWords.some(w => projectVocab.has(w))
+  if (!projects.length && hasProjectHintWord) {
+    return { records: [], outcome: 'DECLINED_NOT_GROUNDED', reason: 'no matching listing record found for this query.' }
+  }
+
   const unit = q.match(/unit\s+(\d+)/)?.[1]
   const beds = q.match(/(\d)\s*[- ]?bed(?:room)?|([234])br/i)?.[1] || q.match(/([234])br/i)?.[1]
   let matches = listings.filter(x => (!projects.length || projects.includes(x.project)) && (!unit || x.unit === unit) && (!beds || x.beds.startsWith(beds)))
+
   if (!matches.length) return { records: [], outcome: 'DECLINED_NOT_GROUNDED', reason: 'no matching listing record found for this query.' }
   matches = [...matches].sort((a,b) => a.id.localeCompare(b.id))
   if (matches.length > 1 && !unit && projects.length > 1) return { records: matches, outcome: 'DECLINED_NOT_GROUNDED', reason: 'ambiguous project reference, multiple matches.' }

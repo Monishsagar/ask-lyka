@@ -17,11 +17,37 @@ npm run questions
 
 Stub mode uses no environment variables or network. The runner targets `http://localhost:3000` by default.
 
-## Live mode (optional, not configured)
+## Real mode (OpenRouter)
 
-This project is intentionally configured to run in deterministic stub mode with no integrations, environment variables, or external scripts. Live OpenRouter/model access is not enabled; adding it later would require a provider adapter and environment variables, while keeping the same verifier authoritative.
+```bash
+MODEL_PROVIDER=live
+OPENROUTER_API_KEY=sk-or-...
+OPENROUTER_MODEL=meta-llama/llama-3.1-8b-instruct:free   # optional — this is the default
+npm run dev
+npm run questions
+```
 
-For the current submission, do not set `MODEL_PROVIDER=live`. The default stub path is offline and deterministic.
+`OPENROUTER_MODEL` defaults to `meta-llama/llama-3.1-8b-instruct:free` (free tier, no balance required).
+Swap to any OpenRouter model id via env var alone — no code change needed.
+
+## Persistent log (Supabase)
+
+1. Create a Supabase project at [supabase.com](https://supabase.com).
+2. Open the SQL editor and run `supabase/migrations/0001_question_log.sql`.
+3. Copy `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` from **Project Settings → API**.
+4. Add them to `.env.local` (or Vercel project settings for production).
+
+Without these two env vars the app automatically uses the in-memory log — no code change needed to fall back.
+
+## Vercel env vars
+
+| Variable | Required for | Notes |
+|---|---|---|
+| `MODEL_PROVIDER` | switching modes | `stub` (default) or `live` |
+| `OPENROUTER_API_KEY` | live mode only | from openrouter.ai |
+| `OPENROUTER_MODEL` | live mode only | optional; defaults to free-tier llama |
+| `SUPABASE_URL` | persistent log | Supabase project settings |
+| `SUPABASE_SERVICE_ROLE_KEY` | persistent log | Settings → API → service_role (server-only) |
 
 ## Tests
 
