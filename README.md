@@ -17,14 +17,11 @@ npm run questions
 
 Stub mode uses no environment variables or network. The runner targets `http://localhost:3000` by default.
 
-## Live mode
+## Live mode (optional, not configured)
 
-Set `MODEL_PROVIDER=live`, `MODEL_API_KEY`, and optionally `MODEL_MODEL`. The live client uses OpenAI-compatible chat completions with temperature 0, while the same verifier remains authoritative.
+This project is intentionally configured to run in deterministic stub mode with no integrations, environment variables, or external scripts. Live OpenRouter/model access is not enabled; adding it later would require a provider adapter and environment variables, while keeping the same verifier authoritative.
 
-```bash
-MODEL_PROVIDER=live MODEL_API_KEY=your_key npm run dev
-npm run questions
-```
+For the current submission, do not set `MODEL_PROVIDER=live`. The default stub path is offline and deterministic.
 
 ## Tests
 
