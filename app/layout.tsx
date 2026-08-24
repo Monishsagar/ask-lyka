@@ -3,8 +3,8 @@ import type { Metadata, Viewport } from 'next'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'v0 App',
-  description: 'Created with v0',
+  title: 'Ask Lyka — Grounded Property Intelligence',
+  description: 'Evidence-grounded answers for real-estate agents, verified against a fixed listing register.',
   generator: 'v0.app',
   icons: {
     icon: [
