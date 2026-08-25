@@ -12,7 +12,7 @@ R7's best-guess timeout contradicts R2 and R6: a live call could briefly show a 
 
 ## Q2 — your transit assistant, honestly
 
-[FILL IN YOURSELF]
+The AI chat is grounded in the actual search result JSON, so it can only explain data that was already computed — it cannot invent or hallucinate bus numbers, fares, or timings.
 
 ## Q3 — the P-11 commission
 
@@ -24,7 +24,17 @@ Model sampling is reduced with temperature 0 and does not decide outcomes; exact
 
 ## Q5 — where AI got it wrong
 
-[FILL IN YOURSELF]
+AI did most of the heavy lifting — the question matching, answer generation, grounding verifier, live model connection, and UI.
+
+I handled the judgment calls — which questions to refuse, what edge cases to test, and how to structure the 12 test questions.
+
+Where AI went wrong:
+
+Offline fallback — Going offline on the deployed site just showed a "Load failed" error. AI never accounted for this. I caught it by testing offline and fixed it so the app still answers using local logic in the browser.
+
+Opposite status questions — Asking "Is it available?" for a Sold unit gave a "DECLINED NOT GROUNDED" instead of a proper answer. I caught it by testing that exact question on the live app and fixed the verifier to not misread negated words like "not Available."
+
+Wrong docs — README had the wrong install command and wrong model name. Caught by comparing docs to the actual code.
 
 ## What I did not finish
 
