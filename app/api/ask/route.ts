@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { retrieve } from '@/lib/retrieval'
 import { getModel } from '@/lib/model'
-import { verify } from '@/lib/verify'
+import { verifyWithTimeout } from '@/lib/verify'
 import { addLog } from '@/lib/log'
 
 export const runtime = 'nodejs'
@@ -27,7 +27,9 @@ export async function POST(req: Request) {
     } else {
       const model = getModel()
       const proposal = await model.propose(question, found.records)
-      const check = verify(proposal.answerText, proposal.citedRecordIds, found.records)
+      // R7: verifyWithTimeout is called as specified — if verification exceeds 2 s the
+      // proposal is returned unverified. See NOTES.md Q1 for why this rule is wrong.
+      const check = await verifyWithTimeout(proposal.answerText, proposal.citedRecordIds, found.records)
       result = check.ok
         ? {
             outcome: 'ANSWERED',
