@@ -184,7 +184,7 @@ Commission: AED 64,000 (3,200,000 × 2% = 64000), based on P-11.
 
 all extracted claims match cited raw fields or an allowed derivation.
 
-Cited P-11.commission derivation
+Cited P-11.price,P-11.notes
 
 *ANSWERED
 ⚡ offline · stub
@@ -192,7 +192,7 @@ Commission: AED 64,000 (3,200,000 × 2% = 64000), based on P-11.
 
 all extracted claims match cited raw fields or an allowed derivation.
 
-Cited P-11.commission derivation
+Cited P-11.price,P-11.notes
 
 **8. What's the price of Sunset Marina unit 505?**
 

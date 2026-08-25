@@ -150,6 +150,16 @@ describe('QA Bug Regression Tests', () => {
     expect(res.outcome).toBeUndefined()
     expect(res.records.map(x => x.id)).toEqual(['P-09'])
   })
+
+  it('Commission Citation Field Fix: commission claims cite price and notes', () => {
+    const r = [listings.find(x => x.id === 'P-11')!]
+    const check = verify('AED 64,000 (3,200,000 × 2% = 64000)', ['P-11'], r)
+    expect(check.ok).toBe(true)
+    const fields = check.verifiedClaims.map(c => c.field)
+    expect(fields).toContain('price')
+    expect(fields).toContain('notes')
+    expect(fields).not.toContain('commission derivation')
+  })
 })
 
 
