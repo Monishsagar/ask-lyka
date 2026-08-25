@@ -40,7 +40,7 @@ export class StubClient implements ModelClient {
     // --- Price ---
     if (/price|cost|worth|value|how much/i.test(question)) {
       if (x.status === 'Withdrawn')
-        return { answerText: `The listing for ${x.project} unit ${x.unit} is withdrawn from market, so its price is no longer valid to quote (record ${x.id}).`, citedRecordIds: [x.id] }
+        return { answerText: `The price of ${x.project} unit ${x.unit} is ${x.price}, though the listing has been Withdrawn (record ${x.id}).`, citedRecordIds: [x.id] }
       if (!x.price)
         return { answerText: `The price for ${x.project} unit ${x.unit} is missing — it is currently under negotiation (record ${x.id}).`, citedRecordIds: [x.id] }
       return { answerText: `The price of ${x.project} unit ${x.unit} is ${x.price} (record ${x.id}).`, citedRecordIds: [x.id] }
@@ -60,7 +60,7 @@ export class StubClient implements ModelClient {
 
     // --- Withdrawn guard (default) ---
     if (x.status === 'Withdrawn')
-      return { answerText: `The listing for ${x.project} unit ${x.unit} is withdrawn from market, so its price is no longer valid to quote (record ${x.id}).`, citedRecordIds: [x.id] }
+      return { answerText: `The price of ${x.project} unit ${x.unit} is ${x.price}, though the listing has been Withdrawn (record ${x.id}).`, citedRecordIds: [x.id] }
 
     // --- Missing price guard (default) ---
     if (!x.price)

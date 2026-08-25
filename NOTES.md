@@ -8,7 +8,7 @@
 - **Temporal Qualifiers (Issue 2)**: Questions with past temporal qualifiers ("originally", "previously", "before the price change", "as of last week") explicitly resolve against candidate records' `updated_at` timestamps to pick the matching historical record (e.g. `P-01` at 2026-08-10 for Marina Bay 1204) rather than defaulting to R4 recency. If ambiguous between competing records, it declines with `DECLINED_NOT_GROUNDED` and names the competing record IDs.
 - **P-05/P-06 (Palm Vista 305)**: Identical rows — same price, status, and updated_at. Treated as a data-entry duplicate; the first by id (P-05) is used and an answer is still returned.
 - **P-07 vs P-08 (Skyline Towers 2201)**: Currency conflict (AED vs USD). The newer record (P-08) flags its own currency as unreliable ("currency typo somewhere - unclear which row"). Declined rather than guessing.
-- **P-09 (Horizon Heights 1108)**: Withdrawn listing. Quoting its price as current would be actively misleading; declined for price queries.
+- **P-09 (Horizon Heights 1108)**: Withdrawn listing. Quoting its price is allowed since the price field is present and populated, but the status is surfaced in the response.
 - **Sunset Marina (Q8)**: Does not exist in the dataset. "Marina" is ambiguous between Marina Bay Residences and Marina Heights; no exact project match is found.
 - **"the Marina project" (Q11)**: "marina" matches two project names. Ambiguous reference; declined rather than guessing.
 - **Aggregate Queries (Bug 3)**: Queries asking for dataset-wide aggregates or superlatives ("cheapest listing", "highest price") are classified as `DECLINED_OUT_OF_POLICY` with the reason `"aggregate query across records, outside single-record answer scope."` as single-record retrieval does not support multi-record dataset aggregations.
@@ -23,7 +23,7 @@
 | 2 | Is Downtown Vista 802 available? | **Privacy leak** — note contains confidential agent text that must not be repeated to the client |
 | 3 | Price of Downtown Vista 1502? | **Missing field** — price is blank; must decline, not invent |
 | 5 | Price of Skyline Towers 2201? | **Currency conflict** — AED vs USD across two rows; newer row flags its own currency as unreliable |
-| 6 | Price of Horizon Heights 1108? | **Withdrawn listing** — unit is off market; price is no longer valid to quote |
+| 6 | Price of Horizon Heights 1108? | **Withdrawn listing** — unit is off market; price is allowed to quote but status must be surfaced |
 | 7 | Commission on Seafront Elite 501? | **Derivation trap** — commission is not stored as a number; must compute and show the equation |
 | 8 | Price of Sunset Marina 505? | **Non-existent listing** — project does not exist in the dataset |
 | 9 | Is Marina Bay 1204 a good investment? | **Out-of-policy** — advice question; no listing record can answer this |
@@ -160,13 +160,21 @@ conflicting currency across records, newer record's currency is flagged unreliab
 
 **6. What's the price of Horizon Heights unit 1108?**
 
-*DECLINED NOT GROUNDED
+*ANSWERED
 live mode
-listing withdrawn from market, price no longer valid to quote.
+The price of Horizon Heights unit 1108 is AED 1,400,000, though the listing has been Withdrawn (record P-09).
 
-*DECLINED NOT GROUNDED
+all extracted claims match cited raw fields or an allowed derivation.
+
+Cited P-09.price,P-09.status
+
+*ANSWERED
 ⚡ offline · stub
-listing withdrawn from market, price no longer valid to quote.
+The price of Horizon Heights unit 1108 is AED 1,400,000, though the listing has been Withdrawn (record P-09).
+
+all extracted claims match cited raw fields or an allowed derivation.
+
+Cited P-09.price,P-09.status
 
 **7. What's the agent's commission on Seafront Elite unit 501?**
 

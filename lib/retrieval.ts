@@ -177,7 +177,6 @@ export function retrieve(question: string): Retrieval {
   }
   const finalRecords = resolved.sort((a,b) => a.id.localeCompare(b.id))
   if (finalRecords.length === 1 && !finalRecords[0].price && /price/i.test(question)) return { records: finalRecords, outcome: 'DECLINED_NOT_GROUNDED', reason: `field price is null/empty on cited record ${finalRecords[0].id}` }
-  if (finalRecords.length === 1 && finalRecords[0].status === 'Withdrawn' && /price/i.test(question)) return { records: finalRecords, outcome: 'DECLINED_NOT_GROUNDED', reason: 'listing withdrawn from market, price no longer valid to quote.' }
   if (/commission/i.test(question) && !finalRecords.some(r => parsePercent(r.notes) !== null)) {
     return { records: finalRecords, outcome: 'DECLINED_NOT_GROUNDED', reason: 'derivation requires a commission percentage, which is not present on this record.' }
   }

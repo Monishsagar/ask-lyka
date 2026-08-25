@@ -144,6 +144,12 @@ describe('QA Bug Regression Tests', () => {
     expect(res.outcome).toBeUndefined()
     expect(res.records.map(x => x.id)).toEqual(['P-01'])
   })
+
+  it('Withdrawn Listing Price Fix: price query on Withdrawn listing P-09 is allowed', () => {
+    const res = retrieve("What's the price of Horizon Heights unit 1108?")
+    expect(res.outcome).toBeUndefined()
+    expect(res.records.map(x => x.id)).toEqual(['P-09'])
+  })
 })
 
 
