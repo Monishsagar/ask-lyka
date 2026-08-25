@@ -10,6 +10,8 @@
 - **P-09 (Horizon Heights 1108)**: Withdrawn listing. Quoting its price as current would be actively misleading; declined for price queries.
 - **Sunset Marina (Q8)**: Does not exist in the dataset. "Marina" is ambiguous between Marina Bay Residences and Marina Heights; no exact project match is found.
 - **"the Marina project" (Q11)**: "marina" matches two project names. Ambiguous reference; declined rather than guessing.
+- **Aggregate Queries (Bug 3)**: Queries asking for dataset-wide aggregates or superlatives ("cheapest listing", "highest price") are classified as `DECLINED_OUT_OF_POLICY` with the reason `"aggregate query across records, outside single-record answer scope."` as single-record retrieval does not support multi-record dataset aggregations.
+- **Multi-Entity Queries (Bug 3 & Bug 4)**: Queries comparing multiple distinct listings ("Skyline 2201 vs Horizon 1109", "Marina Bay 1204 vs Marina Heights 704") or querying historical trends across records ("Marina Bay 1204 price trend") are classified as `DECLINED_NOT_GROUNDED` with the reason `"question requires comparing multiple records, which this system's retrieval does not currently support."` to maintain consistent zero-network stub and live behavior without expanding single-record retrieval scope.
 - The in-memory log is the fallback when Supabase env vars are absent. Supabase is used when `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` are set.
 
 ## Ten Traps

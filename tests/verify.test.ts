@@ -80,3 +80,58 @@ describe('policy enforcement (advice & non-schema fields)', () => {
   })
 })
 
+describe('QA Bug Regression Tests', () => {
+  it('Bug 1: proposing AED 1,950,000 against cited P-02 verifies true', () => {
+    const p02 = listings.filter(x => x.id === 'P-02')
+    expect(verify('The current price of Marina Bay Residences unit 1204 is AED 1,950,000.', ['P-02'], p02).ok).toBe(true)
+  })
+
+  it('Bug 2: non-existent field sqft on conflicted record declines with field-does-not-exist reason', () => {
+    const res = retrieve("What's the square footage of Skyline Towers unit 2201?")
+    expect(res.outcome).toBe('DECLINED_OUT_OF_POLICY')
+    expect(res.reason).toBe('question asks for advice or a field not present in the schema.')
+  })
+
+  it('Bug 3: cheapest listing query declines as aggregate out-of-policy', () => {
+    const res = retrieve("Which of your listings is the cheapest?")
+    expect(res.outcome).toBe('DECLINED_OUT_OF_POLICY')
+    expect(res.reason).toBe('aggregate query across records, outside single-record answer scope.')
+  })
+
+  it('Bug 3: commission query on listing without commission percentage declines as missing input', () => {
+    const res = retrieve("What commission would I earn on Marina Bay unit 1204?")
+    expect(res.outcome).toBe('DECLINED_NOT_GROUNDED')
+    expect(res.reason).toBe('derivation requires a commission percentage, which is not present on this record.')
+  })
+
+  it('Bug 3: comparison query between two units declines with multi-record reason', () => {
+    const res = retrieve("Between Skyline Towers 2201 and Horizon Heights 1109, which is available?")
+    expect(res.outcome).toBe('DECLINED_NOT_GROUNDED')
+    expect(res.reason).toBe("question requires comparing multiple records, which this system's retrieval does not currently support.")
+  })
+
+  it('Bug 3 Determinism test: running Bug 3 questions twice returns identical output', () => {
+    const bug3Questions = [
+      "Which of your listings is the cheapest?",
+      "What commission would I earn on Marina Bay unit 1204?",
+      "Between Skyline Towers 2201 and Horizon Heights 1109, which is available?",
+    ]
+    for (const q of bug3Questions) {
+      const run1 = retrieve(q)
+      const run2 = retrieve(q)
+      expect(run1).toEqual(run2)
+    }
+  })
+
+  it('Bug 4: multi-entity comparison and price trend queries decline with multi-record reason', () => {
+    const resSamePrice = retrieve("Is Marina Bay 1204 the same price as Marina Heights 704?")
+    expect(resSamePrice.outcome).toBe('DECLINED_NOT_GROUNDED')
+    expect(resSamePrice.reason).toBe("question requires comparing multiple records, which this system's retrieval does not currently support.")
+
+    const resTrend = retrieve("Has the price of Marina Bay 1204 gone up or down recently?")
+    expect(resTrend.outcome).toBe('DECLINED_NOT_GROUNDED')
+    expect(resTrend.reason).toBe("question requires comparing multiple records, which this system's retrieval does not currently support.")
+  })
+})
+
+

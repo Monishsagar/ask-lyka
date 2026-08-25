@@ -39,7 +39,7 @@ export function isOutOfPolicy(question: string): boolean {
 
   // 3. Physical / Spatial Properties Not In Schema (sqft, size, floor, location, address)
   if (
-    /\b(sqft|sq\s*ft|sq\.?\s*ft|square\s+feet|square\s+foot|sqm|sq\.?\s*m|square\s+meter|square\s+meters|square\s+metre|square\s+metres|dimensions|area\s+size|total\s+area|living\s+area|surface\s+area)\b/.test(q) ||
+    /\b(sqft|sq\s*ft|sq\.?\s*ft|square\s+feet|square\s+foot|square\s+footage|sq\s+footage|footage|sqm|sq\.?\s*m|square\s+meter|square\s+meters|square\s+metre|square\s+metres|dimensions|area\s+size|total\s+area|living\s+area|surface\s+area)\b/.test(q) ||
     /\b(floor|floors|floor\s+number|story|stories|storey|storeys|level|levels|floorplan|floor\s+plan|blueprint|layout)\b/.test(q) ||
     /\b(address|location|neighborhood|district|zip|zipcode|postal\s+code|street|map|gps|coordinates|directions)\b/.test(q) ||
     /\bwhere\s+is\b/.test(q) ||
@@ -76,18 +76,53 @@ export function isOutOfPolicy(question: string): boolean {
   return false
 }
 
+function parsePercent(val: string): number | null {
+  const match = val.match(/(\d+(?:\.\d+)?)%/)
+  return match ? Number(match[1]) : null
+}
+
 export function retrieve(question: string): Retrieval {
   if (isOutOfPolicy(question)) return { records: [], outcome: 'DECLINED_OUT_OF_POLICY', reason: 'question asks for advice or a field not present in the schema.' }
+
   const q = question.toLowerCase()
+
+  // Aggregate / superlative queries across the dataset
+  if (/\b(cheapest|most\s+expensive|lowest\s+price|highest\s+price|least\s+expensive|most\s+affordable|average\s+price|min\s+price|max\s+price)\b/.test(q)) {
+    return { records: [], outcome: 'DECLINED_OUT_OF_POLICY', reason: 'aggregate query across records, outside single-record answer scope.' }
+  }
+
+  // Multi-entity comparison or trend queries across multiple records
+  const mentionsMultipleUnits = (q.match(/\b\d{3,4}\b/g) || []).length >= 2
+  if (
+    mentionsMultipleUnits ||
+    /\b(between|same\s+price\s+as|compare|comparison|cheaper\b.*?\bthan|more\s+expensive\b.*?\bthan|gone\s+up\s+or\s+down|price\s+trend|recently)\b/.test(q)
+  ) {
+    return { records: [], outcome: 'DECLINED_NOT_GROUNDED', reason: "question requires comparing multiple records, which this system's retrieval does not currently support." }
+  }
+
   const allProjects = [...new Set(listings.map(x => x.project))]
 
-  // Step 1: exact full project name match (case-insensitive)
-  const explicitProjects = allProjects.filter(p => q.includes(p.toLowerCase()))
+  // Step 1: exact full project name match or distinct multi-word phrase match (case-insensitive)
+  const projectAliases: Record<string, string> = {
+    'marina bay': 'Marina Bay Residences',
+    'marina heights': 'Marina Heights',
+    'palm vista': 'Palm Vista Residences',
+    'downtown vista': 'Downtown Vista',
+    'horizon heights': 'Horizon Heights',
+    'skyline towers': 'Skyline Towers',
+    'seafront elite': 'Seafront Elite',
+  }
 
-  // Step 2: word-level fallback — only use when no exact match found.
-  // A word must UNIQUELY identify ONE project to be trusted; if it matches
-  // multiple projects (e.g. "marina" → Bay, Heights, Heights) we treat it as
-  // ambiguous rather than guessing. Words shorter than 5 chars are too generic.
+  let explicitProjects = allProjects.filter(p => q.includes(p.toLowerCase()))
+  if (!explicitProjects.length) {
+    for (const [alias, fullName] of Object.entries(projectAliases)) {
+      if (q.includes(alias)) {
+        explicitProjects = [fullName]
+        break
+      }
+    }
+  }
+
   let projects: string[]
   if (explicitProjects.length) {
     projects = explicitProjects
@@ -95,16 +130,9 @@ export function retrieve(question: string): Retrieval {
     const wordMatches = allProjects.filter(p =>
       p.toLowerCase().split(' ').some(w => w.length >= 5 && q.includes(w))
     )
-    // Only use the word-fallback when it narrows to a single unambiguous project
     projects = wordMatches.length === 1 ? wordMatches : []
   }
 
-  // Step 3: Guard against wrong-project unit matches.
-  // Collect all meaningful words that appear in ANY known project name.
-  // If the query contains one of those words but projects resolved to empty,
-  // the user is referencing a project that either doesn't exist ("Marina mall")
-  // or is ambiguous. Either way, do NOT fall through to a unit-only search
-  // that would silently match the wrong project.
   const projectVocab = new Set(
     allProjects.flatMap(p => p.toLowerCase().split(' ').filter(w => w.length >= 4))
   )
@@ -114,7 +142,7 @@ export function retrieve(question: string): Retrieval {
     return { records: [], outcome: 'DECLINED_NOT_GROUNDED', reason: 'no matching listing record found for this query.' }
   }
 
-  const unit = q.match(/unit\s+(\d+)/)?.[1]
+  const unit = q.match(/(?:unit\s+)?(\d{3,4})\b/i)?.[1]
   const beds = q.match(/(\d)\s*[- ]?bed(?:room)?|([234])br/i)?.[1] || q.match(/([234])br/i)?.[1]
   let matches = listings.filter(x => (!projects.length || projects.includes(x.project)) && (!unit || x.unit === unit) && (!beds || x.beds.startsWith(beds)))
 
@@ -136,6 +164,9 @@ export function retrieve(question: string): Retrieval {
   const finalRecords = resolved.sort((a,b) => a.id.localeCompare(b.id))
   if (finalRecords.length === 1 && !finalRecords[0].price && /price/i.test(question)) return { records: finalRecords, outcome: 'DECLINED_NOT_GROUNDED', reason: 'price field missing, under negotiation.' }
   if (finalRecords.length === 1 && finalRecords[0].status === 'Withdrawn' && /price/i.test(question)) return { records: finalRecords, outcome: 'DECLINED_NOT_GROUNDED', reason: 'listing withdrawn from market, price no longer valid to quote.' }
+  if (/commission/i.test(question) && !finalRecords.some(r => parsePercent(r.notes) !== null)) {
+    return { records: finalRecords, outcome: 'DECLINED_NOT_GROUNDED', reason: 'derivation requires a commission percentage, which is not present on this record.' }
+  }
   return { records: finalRecords }
 }
 function parseCurrency(value: string) { return value.split(' ')[0] }
