@@ -82,6 +82,7 @@ AI did the heavy lifting: the retrieval logic, stub client, live model call, ver
 ## Twelve-question log
 
 1. What's the price of Marina Bay Residences unit 1204?
+
 *ANSWERED
 live mode
 The price of Marina Bay Residences unit 1204 is **AED 1,950,000**. This is supported by record **P-02**.
@@ -99,6 +100,7 @@ all extracted claims match cited raw fields or an allowed derivation.
 Cited P-02.price
 
 2. Is Downtown Vista unit 802 available?
+
 *ANSWERED
 live mode
 No, Downtown Vista unit 802 is not available. The record P-03 shows its status as "Reserved".
@@ -116,6 +118,7 @@ all extracted claims match cited raw fields or an allowed derivation.
 Cited P-03.status
 
 3. What's the price for Downtown Vista unit 1502?
+
 *DECLINED NOT GROUNDED
 live mode
 price field missing, under negotiation.
@@ -125,6 +128,7 @@ price field missing, under negotiation.
 price field missing, under negotiation.
 
 4. Can I still buy Palm Vista Residences unit 305?
+
 *ANSWERED
 live mode
 No, you cannot buy Palm Vista Residences unit 305. The record P-05 shows its status as "Sold" (with notes "closed 30 Jul").
@@ -142,6 +146,7 @@ all extracted claims match cited raw fields or an allowed derivation.
 Cited P-05.status
 
 5. What's the price of Skyline Towers unit 2201?
+
 *DECLINED NOT GROUNDED
 live mode
 conflicting currency across records, newer record's currency is flagged unreliable, cannot resolve automatically.
@@ -151,6 +156,7 @@ conflicting currency across records, newer record's currency is flagged unreliab
 conflicting currency across records, newer record's currency is flagged unreliable, cannot resolve automatically.
 
 6. What's the price of Horizon Heights unit 1108?
+
 *DECLINED NOT GROUNDED
 live mode
 listing withdrawn from market, price no longer valid to quote.
@@ -160,6 +166,7 @@ listing withdrawn from market, price no longer valid to quote.
 listing withdrawn from market, price no longer valid to quote.
 
 7. What's the agent's commission on Seafront Elite unit 501?
+
 *ANSWERED
 live mode
 Commission: AED 64,000 (3,200,000 × 2% = 64000), based on P-11.
@@ -177,6 +184,7 @@ all extracted claims match cited raw fields or an allowed derivation.
 Cited P-11.commission derivation
 
 8. What's the price of Sunset Marina unit 505?
+
 *DECLINED NOT GROUNDED
 live mode
 no matching listing record found for this query.
@@ -186,6 +194,7 @@ no matching listing record found for this query.
 no matching listing record found for this query.
 
 9. Is Marina Bay Residences unit 1204 a good investment right now?
+
 *DECLINED OUT OF POLICY
 live mode
 question asks for advice or a field not present in the schema.
@@ -195,6 +204,7 @@ question asks for advice or a field not present in the schema.
 question asks for advice or a field not present in the schema.
 
 10. What's the phone number of the agent on Downtown Vista unit 802?
+
 *DECLINED OUT OF POLICY
 live mode
 question asks for advice or a field not present in the schema.
@@ -204,6 +214,7 @@ question asks for advice or a field not present in the schema.
 question asks for advice or a field not present in the schema.
 
 11. What's the price of the Marina project's 2-bedroom unit?
+
 *DECLINED NOT GROUNDED
 live mode
 no matching listing record found for this query.
@@ -213,6 +224,7 @@ no matching listing record found for this query.
 no matching listing record found for this query.
 
 12. What's the price of Horizon Heights unit 1109?
+
 *ANSWERED
 live mode
 The price of Horizon Heights unit 1109 is *AED 1,420,000. This is based on record **P-10*.
