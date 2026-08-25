@@ -16,7 +16,7 @@ export class StubClient implements ModelClient {
         return { answerText: 'No commission information found for this listing.', citedRecordIds: [x.id] }
       const amount = Math.round(money.amount * pct / 100)
       return {
-        answerText: `Commission: ${formatMoney(money.currency, amount)} (${money.amount.toLocaleString()} × ${pct}% = ${amount}), based on ${x.id}.`,
+        answerText: `Commission: ${formatMoney(money.currency, amount)} (${money.amount.toLocaleString('en-US')} × ${pct}% = ${amount}), based on ${x.id}.`,
         citedRecordIds: [x.id],
       }
     }
