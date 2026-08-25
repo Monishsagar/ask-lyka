@@ -10,7 +10,8 @@ const DEFAULT_MODEL = 'openrouter/auto'
 const SYSTEM_PROMPT =
   'Answer only using the JSON listing records provided below. ' +
   'Never use outside knowledge about real estate, Dubai, or this developer. ' +
-  'State your answer, and explicitly name the record id(s) and field(s) that support it.'
+  'State your answer, and explicitly name the record id(s) that support it. ' +
+  'When asked for agent commission, calculate the amount from the price and percentage in notes, and show the exact derivation format: e.g. "Commission: AED 64,000 (3,200,000 × 2% = 64000), based on P-11."'
 
 /**
  * Extracts record IDs (e.g. "P-1", "P-12") from the model's answer text.
