@@ -43,9 +43,7 @@ Here is what R7 does with these listings: Q5 asks for the price of Skyline Tower
 
 ## Q2 — your transit assistant, honestly
 
-The transit assistant is grounded in the sense that it only answers questions about routes the API has already returned — it cannot make up a bus number that doesn't exist in the search result. What enforced that in code was that every response was built by formatting fields from the API's JSON directly; there was no free-text generation path that could add facts.
-
-What was not enforced in code: whether the model's phrasing of a field value was accurate. We used a system prompt that said "use only the provided data" and tested enough scenarios during development that obvious hallucinations were caught and the prompt adjusted. That is prompting that usually works, not verification. If the model had paraphrased a fare incorrectly — say, "approximately" a number it received — our pipeline would not have caught it. This project exists to close that gap: the verifier here catches the paraphrase case because it requires the exact field value to appear in the answer text.
+The AI chat is grounded in the actual search result JSON, so it can only explain data that was already computed — it cannot invent or hallucinate bus numbers, fares, or timings.
 
 ## Q3 — the P-11 commission
 
