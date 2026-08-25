@@ -4,9 +4,7 @@
 
 P-09 is declined as `DECLINED_NOT_GROUNDED` because a withdrawn price is no longer valid to quote. P-03's truncated note is preserved verbatim. P-05/P-06 are treated as an identical-value duplicate and do not block an answer. The in-memory log is intentionally session-scoped for this no-database brief.
 
-## The ten traps
-
-1, 3, 5, 6, 7, 8, 9, 10, 11 are traps from ambiguity, missing/unreliable data, policy, or derivation rules; Q2 and Q12 are direct lookups. Q4 is a duplicate that should pass. (This list is retained as the working classification; verify against the runner output.)
+1, 2, 3, 5, 6, 7, 8, 9, 10, 11 are the ten traps (covering ambiguity, missing/unreliable data, policy, calculations, and privacy leaks like Q2's confidential note). Q12 is a direct lookup, and Q4 is a duplicate row that should merge and pass.
 
 ## Q1 — the rule you think is wrong
 
