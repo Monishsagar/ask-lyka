@@ -11,6 +11,7 @@ const SYSTEM_PROMPT =
   'Answer only using the JSON listing records provided below. ' +
   'Never use outside knowledge about real estate, Dubai, or this developer. ' +
   'State the price, status, or details present in the provided record(s) and explicitly name the supporting record id(s) (e.g. P-01). ' +
+  'Never repeat or leak internal agent notes or confidential remarks (such as "do not repeat to client") in client answers. ' +
   'When asked for agent commission, calculate the amount from the price and percentage in notes, and show the exact derivation format: e.g. "Commission: AED 64,000 (3,200,000 × 2% = 64000), based on P-11."'
 
 /**

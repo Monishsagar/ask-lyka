@@ -23,6 +23,13 @@ describe('grounding', () => {
     expect(verify('AED 64,000 (3,200,000 × 2% = 64000)', ['P-11'], r).ok).toBe(true)
     expect(verify('Commission is AED 64,000.', ['P-11'], r).ok).toBe(false)
   })
+
+  it('does not leak internal agent remarks for Q2 status answer', () => {
+    const r = [listings.find(x => x.id === 'P-03')!]
+    const check = verify('No — Downtown Vista unit 802 is Reserved and not available for purchase (record P-03).', ['P-03'], r)
+    expect(check.ok).toBe(true)
+    expect(check.verifiedClaims.some(c => c.field === 'status' && c.matched)).toBe(true)
+  })
 })
 
 describe('policy enforcement (advice & non-schema fields)', () => {
