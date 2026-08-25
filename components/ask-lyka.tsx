@@ -1,5 +1,6 @@
 'use client'
 import { useState } from 'react'
+import { isNetworkError, runClientStub } from '@/lib/client-stub'
 
 export function AskLyka() {
   const [q, setQ] = useState('')
@@ -30,7 +31,18 @@ export function AskLyka() {
 
       setResult(data)
     } catch (err: any) {
-      setError(err?.message ?? 'Network error — check your connection and try again.')
+      // If the server is unreachable (offline / Vercel down), run the stub
+      // pipeline entirely in the browser so the app stays usable.
+      if (isNetworkError(err)) {
+        try {
+          const offlineResult = await runClientStub(q)
+          setResult(offlineResult)
+        } catch (stubErr: any) {
+          setError(stubErr?.message ?? 'Offline stub error.')
+        }
+      } else {
+        setError(err?.message ?? 'Network error — check your connection and try again.')
+      }
     } finally {
       setLoading(false)
     }
@@ -79,7 +91,11 @@ export function AskLyka() {
         <article className={`result ${result.outcome?.toLowerCase()}`}>
           <div className="result-head">
             <span>{result.outcome?.replaceAll('_', ' ')}</span>
-            {result.mode && <small>{result.mode} mode</small>}
+            {result.mode && (
+              <small style={result.mode === 'offline-stub' ? { color: 'var(--amber, #f59e0b)', fontWeight: 600 } : undefined}>
+                {result.mode === 'offline-stub' ? '⚡ offline · stub' : result.mode + ' mode'}
+              </small>
+            )}
           </div>
           {result.answer && <p className="answer">{result.answer}</p>}
           <p className="reason">{result.reason}</p>
