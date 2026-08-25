@@ -4,7 +4,8 @@
 
 - **P-01 vs P-02 (Marina Bay Residences 1204)**: Two records with conflicting prices. Resolved by R4 — P-02 (updated 2026-08-19) is newer than P-01 (updated 2026-08-10), so AED 1,950,000 is the current price.
 - **P-03 (Downtown Vista 802)**: The note contains `"do not re[peat to client]"` — the text is truncated in the source data and is preserved verbatim. The model is given this note as context but must not reproduce private agent remarks.
-- **P-04 (Downtown Vista 1502)**: Price field is blank. This is treated as unknown / under negotiation, not zero. A price question about this unit is declined.
+- **P-04 (Downtown Vista 1502)**: Price field is blank. This is treated as unknown / under negotiation, not zero. It is classified as `DECLINED_NOT_GROUNDED` with reason `field price is null/empty on cited record P-04`.
+- **Temporal Qualifiers (Issue 2)**: Questions with past temporal qualifiers ("originally", "previously", "before the price change", "as of last week") explicitly resolve against candidate records' `updated_at` timestamps to pick the matching historical record (e.g. `P-01` at 2026-08-10 for Marina Bay 1204) rather than defaulting to R4 recency. If ambiguous between competing records, it declines with `DECLINED_NOT_GROUNDED` and names the competing record IDs.
 - **P-05/P-06 (Palm Vista 305)**: Identical rows — same price, status, and updated_at. Treated as a data-entry duplicate; the first by id (P-05) is used and an answer is still returned.
 - **P-07 vs P-08 (Skyline Towers 2201)**: Currency conflict (AED vs USD). The newer record (P-08) flags its own currency as unreliable ("currency typo somewhere - unclear which row"). Declined rather than guessing.
 - **P-09 (Horizon Heights 1108)**: Withdrawn listing. Quoting its price as current would be actively misleading; declined for price queries.

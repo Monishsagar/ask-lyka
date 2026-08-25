@@ -132,6 +132,19 @@ describe('QA Bug Regression Tests', () => {
     expect(resTrend.outcome).toBe('DECLINED_NOT_GROUNDED')
     expect(resTrend.reason).toBe("question requires comparing multiple records, which this system's retrieval does not currently support.")
   })
+
+  it('Issue 1: null/empty field on retrieved record declines as NOT GROUNDED with field null/empty reason', () => {
+    const res = retrieve("What's the price for Downtown Vista unit 1502?")
+    expect(res.outcome).toBe('DECLINED_NOT_GROUNDED')
+    expect(res.reason).toBe('field price is null/empty on cited record P-04')
+  })
+
+  it('Issue 2: temporally-qualified question resolves to matching historical record P-01', () => {
+    const res = retrieve("What was the price of Marina Bay Residences unit 1204 originally?")
+    expect(res.outcome).toBeUndefined()
+    expect(res.records.map(x => x.id)).toEqual(['P-01'])
+  })
 })
+
 
 
