@@ -30,6 +30,13 @@ describe('grounding', () => {
     expect(check.ok).toBe(true)
     expect(check.verifiedClaims.some(c => c.field === 'status' && c.matched)).toBe(true)
   })
+
+  it('normalizes single-digit cited record IDs (P-3 -> P-03)', () => {
+    const r = [listings.find(x => x.id === 'P-03')!]
+    const check = verify('No — Downtown Vista unit 802 is Reserved (record P-3).', ['P-3'], r)
+    expect(check.ok).toBe(true)
+    expect(check.verifiedClaims.some(c => c.recordId === 'P-03' && c.matched)).toBe(true)
+  })
 })
 
 describe('policy enforcement (advice & non-schema fields)', () => {

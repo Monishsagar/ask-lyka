@@ -13,8 +13,12 @@ export function normalizePrice(val: string): string {
 }
 
 export function verify(answerText:string, citedRecordIds:string[], records:Listing[]): Verification {
-  if (!citedRecordIds.length) return {ok:false, reason:'no citation returned.', verifiedClaims:[]}
-  const cited = records.filter(r => citedRecordIds.includes(r.id)); const claims: Claim[] = []
+  const normalizedCitedIds = citedRecordIds.map(id => {
+    const m = id.match(/^P-(\d+)$/i)
+    return m ? `P-${m[1].padStart(2, '0')}` : id.toUpperCase()
+  })
+  if (!normalizedCitedIds.length) return {ok:false, reason:'no citation returned.', verifiedClaims:[]}
+  const cited = records.filter(r => normalizedCitedIds.includes(r.id)); const claims: Claim[] = []
   const add = (claim:string, recordId:string, field:string, matched:boolean) => claims.push({claim,recordId,field,matched})
   const commissionExpression = /(?:AED\s?[\d,]+).*?\(\s?[\d,]+\s?×\s?(\d+(?:\.\d+)?)%\s?=/i.test(answerText)
   const rawPrices = [...answerText.matchAll(/(?:\b(?:AED|USD)\s?[\d,]+|[\d,]+\s?(?:AED|USD)\b)/gi)].map(m=>m[0].replace(/[,.]+$|\s+$/g, '').replace(/\s+/g,' '))

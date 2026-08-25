@@ -20,8 +20,11 @@ const SYSTEM_PROMPT =
  * this routes straight into the verifier's "no citation → decline" path.
  */
 function extractRecordIds(text: string): string[] {
-  const matches = [...(text.matchAll(/\bP-\d+\b/g) || [])]
-  return [...new Set(matches.map(m => m[0]))]
+  const matches = [...(text.matchAll(/\bP-\d+\b/gi) || [])]
+  return [...new Set(matches.map(m => {
+    const num = m[0].slice(2)
+    return `P-${num.padStart(2, '0')}`
+  }))]
 }
 
 export class LiveClient implements ModelClient {
