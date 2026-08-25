@@ -1,8 +1,83 @@
 import { listings, Listing } from '@/data/listings'
 export type Retrieval = { records: Listing[]; reason?: string; outcome?: 'DECLINED_NOT_GROUNDED' | 'DECLINED_OUT_OF_POLICY' }
-const policy = /good investment|recommend|should i|phone number|contact|email|advice|invest/i
+export function isOutOfPolicy(question: string): boolean {
+  const q = question.toLowerCase()
+
+  // 1. Advice, Recommendations, Investment, Opinion, Speculation
+  if (
+    /\b(advice|advise|advising|advisable|recommend|recommendation|recommending|suggest|suggestion|opinion|viewpoint)\b/.test(q) ||
+    /\b(invest|investing|investment|investor|roi|return on investment|yield|rental yield|cap rate|appreciation|capital growth|future value|forecast|predict|prediction|speculate)\b/.test(q) ||
+    /\bshould\s+(i|we|one|a\s+client)\b/.test(q) ||
+    /\bwould\s+you\b/.test(q) ||
+    /\bdo\s+you\s+(think|suggest|recommend)\b/.test(q) ||
+    /\bis\s+it\s+(worth|wise|smart|advisable|a\s+good|a\s+bad|a\s+smart)\b/.test(q) ||
+    /\bworth\s+(buying|it|the\s+money|purchasing)\b/.test(q) ||
+    /\b(good|great|bad|smart)\s+(deal|buy|investment|purchase|idea)\b/.test(q) ||
+    /\b(good|fair|overpriced|underpriced|cheap|expensive)\s+price\b/.test(q) ||
+    /\b(overpriced|underpriced)\b/.test(q) ||
+    /\b(negotiable|negotiate|negotiation|discount)\b/.test(q) ||
+    /\bwhich\s+(unit|one|property)\s+(is\s+best|should)\b/.test(q) ||
+    /\b(best|top)\s+(unit|choice|deal|investment|option)\b/.test(q)
+  ) {
+    return true
+  }
+
+  // 2. Contact Info & People Not In Schema (phone, email, contact, broker, developer, owner, agent info)
+  const asksCommission = /\bcommission\b/.test(q)
+  const mentionsAgent = /\bagent\b/.test(q)
+
+  if (
+    /\b(phone|telephone|mobile|cell|whatsapp)\b/.test(q) ||
+    /\b(email|mail)\b/.test(q) ||
+    /\b(contact|reach)\b/.test(q) ||
+    /\b(owner|landlord|seller|buyer|tenant|developer|builder|constructor|realtor|broker)\b/.test(q) ||
+    (mentionsAgent && !asksCommission) ||
+    (mentionsAgent && /\b(phone|email|contact|number|name|details|info)\b/.test(q))
+  ) {
+    return true
+  }
+
+  // 3. Physical / Spatial Properties Not In Schema (sqft, size, floor, location, address)
+  if (
+    /\b(sqft|sq\s*ft|sq\.?\s*ft|square\s+feet|square\s+foot|sqm|sq\.?\s*m|square\s+meter|square\s+meters|square\s+metre|square\s+metres|dimensions|area\s+size|total\s+area|living\s+area|surface\s+area)\b/.test(q) ||
+    /\b(floor|floors|floor\s+number|story|stories|storey|storeys|level|levels|floorplan|floor\s+plan|blueprint|layout)\b/.test(q) ||
+    /\b(address|location|neighborhood|district|zip|zipcode|postal\s+code|street|map|gps|coordinates|directions)\b/.test(q) ||
+    /\bwhere\s+is\b/.test(q) ||
+    /\bhow\s+(big|large)\b/.test(q)
+  ) {
+    return true
+  }
+
+  // 4. Amenities & Features Not In Schema (parking, pool, gym, balcony, furnished, pets, elevator, view)
+  if (
+    /\b(amenity|amenities|facility|facilities)\b/.test(q) ||
+    /\b(parking|garage|parking\s+spot|parking\s+space)\b/.test(q) ||
+    /\b(pool|swimming\s+pool)\b/.test(q) ||
+    /\b(gym|fitness)\b/.test(q) ||
+    /\b(balcony|terrace|patio|yard|garden)\b/.test(q) ||
+    /\b(furnished|furnishing|furniture|appliance|appliances)\b/.test(q) ||
+    /\b(pet|pets|pet\s+friendly)\b/.test(q) ||
+    /\b(elevator|lift)\b/.test(q) ||
+    /\b(sea\s+view|city\s+view|marina\s+view)\b/.test(q)
+  ) {
+    return true
+  }
+
+  // 5. Financial & Legal Fields Not In Schema (rent, lease, payment plan, mortgage, fees, tax)
+  if (
+    /\b(rent|rental|lease|leasing)\b/.test(q) ||
+    /\b(payment\s+plan|down\s+payment|installment|installments|deposit)\b/.test(q) ||
+    /\b(mortgage|loan|financing|interest\s+rate)\b/.test(q) ||
+    /\b(maintenance\s+fee|service\s+charge|hoa|hoa\s+fee|building\s+fee|property\s+tax|tax)\b/.test(q)
+  ) {
+    return true
+  }
+
+  return false
+}
+
 export function retrieve(question: string): Retrieval {
-  if (policy.test(question)) return { records: [], outcome: 'DECLINED_OUT_OF_POLICY', reason: 'question asks for advice or a field not present in the schema.' }
+  if (isOutOfPolicy(question)) return { records: [], outcome: 'DECLINED_OUT_OF_POLICY', reason: 'question asks for advice or a field not present in the schema.' }
   const q = question.toLowerCase()
   const allProjects = [...new Set(listings.map(x => x.project))]
 

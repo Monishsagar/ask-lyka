@@ -1,10 +1,12 @@
 import { Listing, formatMoney, parseMoney, parsePercent } from '@/data/listings'
+import { isOutOfPolicy } from '@/lib/retrieval'
 import { ModelClient } from './types'
 
 function first(context: Listing[]) { return context[0] }
 
 export class StubClient implements ModelClient {
   async propose(question: string, context: Listing[]) {
+    if (isOutOfPolicy(question)) return { answerText: 'Question asks for advice or a field not present in the schema.', citedRecordIds: [] }
     const x = first(context)
     if (!x) return { answerText: '', citedRecordIds: [] }
 
