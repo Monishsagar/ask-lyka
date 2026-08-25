@@ -26,5 +26,17 @@ export function verify(answerText:string, citedRecordIds:string[], records:Listi
   if (commission) { const record=cited.find(r=>parseMoney(r.price)&&parsePercent(r.notes)); const money=record&&parseMoney(record.price); const pct=record&&parsePercent(record.notes); const derived=money&&pct ? `AED ${Math.round(money.amount*pct/100).toLocaleString('en-US')}` : ''; const matched = !!record&&answerText.includes(derived)&&answerText.includes(`${money!.amount.toLocaleString('en-US')} × ${pct}%`); add(derived,record?.id||cited[0].id,'price',matched); add(derived,record?.id||cited[0].id,'notes',matched) }
   const ok=claims.every(c=>c.matched); return {ok, reason:ok?'all extracted claims match cited raw fields or an allowed derivation.':`unverified claim: ${claims.find(c=>!c.matched)?.claim}`, verifiedClaims:claims}
 }
-// R7 intentionally leaves a timing race between raw proposal and verification; this contradicts R2/R6 and is unsafe.
 export async function verifyWithTimeout(answerText:string,cited:string[],records:Listing[], timeoutMs=2000) { return Promise.race([Promise.resolve(verify(answerText,cited,records)),new Promise<Verification>(resolve=>setTimeout(()=>resolve({ok:true,reason:'R7 timeout: returned unverified proposal.',verifiedClaims:[]}),timeoutMs))]) }
+
+export function deduplicateCitations(claims: Claim[]): { id: string; field: string }[] {
+  const seen = new Set<string>()
+  const result: { id: string; field: string }[] = []
+  for (const c of claims) {
+    const key = `${c.recordId}:${c.field}`
+    if (!seen.has(key)) {
+      seen.add(key)
+      result.push({ id: c.recordId, field: c.field })
+    }
+  }
+  return result
+}

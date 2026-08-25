@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { listings } from '@/data/listings'
-import { verify } from '@/lib/verify'
+import { verify, deduplicateCitations } from '@/lib/verify'
 import { retrieve } from '@/lib/retrieval'
 import { runClientStub } from '@/lib/client-stub'
 
@@ -159,6 +159,12 @@ describe('QA Bug Regression Tests', () => {
     expect(fields).toContain('price')
     expect(fields).toContain('notes')
     expect(fields).not.toContain('commission derivation')
+    
+    const citations = deduplicateCitations(check.verifiedClaims)
+    expect(citations).toEqual([
+      { id: 'P-11', field: 'price' },
+      { id: 'P-11', field: 'notes' }
+    ])
   })
 })
 

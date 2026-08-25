@@ -12,7 +12,7 @@
 
 import { retrieve } from '@/lib/retrieval'
 import { StubClient } from '@/lib/model/stub'
-import { verify } from '@/lib/verify'
+import { verify, deduplicateCitations } from '@/lib/verify'
 
 const stub = new StubClient()
 
@@ -64,7 +64,7 @@ export async function runClientStub(question: string): Promise<ClientStubResult>
     ? {
         outcome: 'ANSWERED',
         answer: proposal.answerText,
-        citations: check.verifiedClaims.map(c => ({ id: c.recordId, field: c.field })),
+        citations: deduplicateCitations(check.verifiedClaims),
         reason: check.reason,
         verifiedClaims: check.verifiedClaims,
         mode: 'offline-stub',

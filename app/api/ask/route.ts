@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { retrieve } from '@/lib/retrieval'
 import { getModel } from '@/lib/model'
-import { verifyWithTimeout } from '@/lib/verify'
+import { verifyWithTimeout, deduplicateCitations } from '@/lib/verify'
 import { addLog } from '@/lib/log'
 
 export const runtime = 'nodejs'
@@ -34,7 +34,7 @@ export async function POST(req: Request) {
         ? {
             outcome: 'ANSWERED',
             answer: proposal.answerText,
-            citations: check.verifiedClaims.map(c => ({ id: c.recordId, field: c.field })),
+            citations: deduplicateCitations(check.verifiedClaims),
             reason: check.reason,
             verifiedClaims: check.verifiedClaims,
           }
