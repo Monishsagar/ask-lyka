@@ -44,4 +44,30 @@ The log is persisted to Supabase when `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_
 
 ## Twelve-question log
 
-Run `npm run questions` against the dev server to paste the actual session output here.
+Run `pnpm run questions` against the dev server to paste the actual session output here.
+
+## Rule compliance
+
+**R1 — Ground everything** ✅
+System prompt explicitly forbids outside knowledge. Retrieval reads only from the 12-row local dataset. The model never receives information beyond the retrieved records.
+
+**R2 — Decline, don't guess** ✅
+Out-of-policy questions (advice, contact details) are declined at retrieval before the model is even called. The verifier rejects any claim it cannot match to a cited field — no softened guesses reach the client.
+
+**R3 — Cite it or it didn't happen** ✅
+`verify()` returns `ok: false` when `citedRecordIds` is empty. Every `ANSWERED` response includes the exact record id(s) and field(s) used.
+
+**R4 — Recency resolves conflicts** ✅
+Conflicting records for the same unit are resolved by `updated_at` (most recent wins). If two conflicting records share the exact same `updated_at`, retrieval declines and flags for human review.
+
+**R5 — Determinism** ✅
+Live model calls use `temperature: 0`. Retrieval is sorted by id for consistent ordering. The grounding decision lives in the deterministic verifier, not in the model's free-text output.
+
+**R6 — No number is ever invented** ✅
+Prices are exact-matched against the cited record's `price` field. Commission values are only accepted when the answer shows the full derivation (`price × % = amount`), which the verifier independently recomputes.
+
+**R7 — Agent experience** ⚠️ intentionally not activated
+`verifyWithTimeout()` is implemented in `lib/verify.ts` but is not called in the main route. Activating it would allow an unverified answer to briefly surface if verification is slow — directly violating R2 (don't guess) and R6 (no invented number). Safety takes precedence; R7 is documented as the one accepted design tension.
+
+**R8 — Every question is accounted for** ✅
+Every request — including server errors — ends as exactly one of `ANSWERED`, `DECLINED_NOT_GROUNDED`, or `DECLINED_OUT_OF_POLICY` with a reason, and is logged to Supabase (or in-memory fallback). The catch block in `app/api/ask/route.ts` fires `addLog()` with fire-and-forget so a logging failure never suppresses the original error. The client-side offline stub follows the same outcome structure but cannot log (no server access when offline).

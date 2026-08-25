@@ -7,9 +7,13 @@ import { addLog } from '@/lib/log'
 export const runtime = 'nodejs'
 
 export async function POST(req: Request) {
+  // Declared outside try so the catch block can log it (R8: every question is accounted for).
+  let question: string | null = null
+
   try {
-    const { question } = await req.json()
-    const found = retrieve(String(question || ''))
+    const body = await req.json()
+    question = String(body.question || '')
+    const found = retrieve(question)
     let result: any
 
     if (found.outcome) {
@@ -65,7 +69,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json(response)
   } catch (err: any) {
-    // Always return JSON so the client never crashes on response.json().
+    // Always return JSON so the client never crashes on response.json().\
     const isNetworkError =
       err?.cause?.code === 'ECONNREFUSED' ||
       err?.cause?.code === 'ENOTFOUND' ||
@@ -74,20 +78,22 @@ export async function POST(req: Request) {
 
     console.error('[api/ask] unhandled error:', err?.message)
 
-    return NextResponse.json(
-      {
-        outcome: 'DECLINED_NOT_GROUNDED',
-        answer: null,
-        citations: [],
-        reason: isNetworkError
-          ? 'Unable to reach the model provider — check your internet connection and try again.'
-          : `Service error: ${err?.message ?? 'unknown error'}`,
-        verifiedClaims: [],
-        timestamp: new Date().toISOString(),
-        mode: process.env.MODEL_PROVIDER === 'live' ? 'live' : 'stub',
-        question: null,
-      },
-      { status: 500 }
-    )
+    const errorResponse = {
+      outcome: 'DECLINED_NOT_GROUNDED',
+      answer: null,
+      citations: [],
+      reason: isNetworkError
+        ? 'Unable to reach the model provider — check your internet connection and try again.'
+        : `Service error: ${err?.message ?? 'unknown error'}`,
+      verifiedClaims: [],
+      timestamp: new Date().toISOString(),
+      mode: process.env.MODEL_PROVIDER === 'live' ? 'live' : 'stub',
+      question,
+    }
+
+    // R8: log error responses too — fire-and-forget so a logging failure never masks the original error.
+    addLog(errorResponse).catch(() => {})
+
+    return NextResponse.json(errorResponse, { status: 500 })
   }
 }
