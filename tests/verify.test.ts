@@ -166,6 +166,12 @@ describe('QA Bug Regression Tests', () => {
       { id: 'P-11', field: 'notes' }
     ])
   })
+
+  it('Ambiguous Entity Reference Fix: returns detailed ambiguous reference reason for 2+ candidates', () => {
+    const res = retrieve("What's the price of the Marina project's 2-bedroom unit?")
+    expect(res.outcome).toBe('DECLINED_NOT_GROUNDED')
+    expect(res.reason).toBe("ambiguous reference: 'Marina' matches multiple listings (P-01, P-02, P-12), cannot resolve without a more specific project name or unit number")
+  })
 })
 
 

@@ -228,11 +228,11 @@ question asks for advice or a field not present in the schema.
 
 *DECLINED NOT GROUNDED
 live mode
-no matching listing record found for this query.
+ambiguous reference: 'Marina' matches multiple listings (P-01, P-02, P-12), cannot resolve without a more specific project name or unit number
 
 *DECLINED NOT GROUNDED
 ⚡ offline · stub
-no matching listing record found for this query.
+ambiguous reference: 'Marina' matches multiple listings (P-01, P-02, P-12), cannot resolve without a more specific project name or unit number
 
 **12. What's the price of Horizon Heights unit 1109?**
 

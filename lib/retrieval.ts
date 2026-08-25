@@ -130,7 +130,7 @@ export function retrieve(question: string): Retrieval {
     const wordMatches = allProjects.filter(p =>
       p.toLowerCase().split(' ').some(w => w.length >= 5 && q.includes(w))
     )
-    projects = wordMatches.length === 1 ? wordMatches : []
+    projects = wordMatches
   }
 
   const projectVocab = new Set(
@@ -148,7 +148,16 @@ export function retrieve(question: string): Retrieval {
 
   if (!matches.length) return { records: [], outcome: 'DECLINED_NOT_GROUNDED', reason: 'no matching listing record found for this query.' }
   matches = [...matches].sort((a,b) => a.id.localeCompare(b.id))
-  if (matches.length > 1 && !unit && projects.length > 1) return { records: matches, outcome: 'DECLINED_NOT_GROUNDED', reason: 'ambiguous project reference, multiple matches.' }
+  if (matches.length > 1 && projects.length > 1) {
+    const rawTerm = queryWords.find(w => projectVocab.has(w.toLowerCase()))
+    const term = rawTerm ? (question.match(new RegExp(`\\b${rawTerm}\\b`, 'i'))?.[0] || rawTerm) : 'project'
+    const candidateIds = matches.map(x => x.id).join(', ')
+    return {
+      records: matches,
+      outcome: 'DECLINED_NOT_GROUNDED',
+      reason: `ambiguous reference: '${term}' matches multiple listings (${candidateIds}), cannot resolve without a more specific project name or unit number`
+    }
+  }
   const groups = new Map<string, Listing[]>()
   matches.forEach(x => { const key = `${x.project}|${x.unit}`; groups.set(key, [...(groups.get(key) || []), x]) })
   const resolved: Listing[] = []
