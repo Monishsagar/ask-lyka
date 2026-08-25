@@ -30,7 +30,7 @@ Model sampling is reduced with temperature 0 and does not decide outcomes; exact
 
 ## What I did not finish
 
-The log is in-memory rather than durable, and live provider support assumes an OpenAI-compatible endpoint. The runner output should be refreshed after a local run.
+The log is persisted to Supabase when `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` are set; it falls back to in-memory when they are absent. The live provider is OpenRouter (`https://openrouter.ai/api/v1/chat/completions`), using its OpenAI-compatible chat endpoint.
 
 ## Twelve-question log
 
