@@ -81,7 +81,7 @@ AI did the heavy lifting: the retrieval logic, stub client, live model call, ver
 
 ## Twelve-question log
 
-1. What's the price of Marina Bay Residences unit 1204?
+**1. What's the price of Marina Bay Residences unit 1204?**
 
 *ANSWERED
 live mode
@@ -99,7 +99,7 @@ all extracted claims match cited raw fields or an allowed derivation.
 
 Cited P-02.price
 
-2. Is Downtown Vista unit 802 available?
+**2. Is Downtown Vista unit 802 available?**
 
 *ANSWERED
 live mode
@@ -117,7 +117,7 @@ all extracted claims match cited raw fields or an allowed derivation.
 
 Cited P-03.status
 
-3. What's the price for Downtown Vista unit 1502?
+**3. What's the price for Downtown Vista unit 1502?**
 
 *DECLINED NOT GROUNDED
 live mode
@@ -127,7 +127,7 @@ price field missing, under negotiation.
 ⚡ offline · stub
 price field missing, under negotiation.
 
-4. Can I still buy Palm Vista Residences unit 305?
+**4. Can I still buy Palm Vista Residences unit 305?**
 
 *ANSWERED
 live mode
@@ -145,7 +145,7 @@ all extracted claims match cited raw fields or an allowed derivation.
 
 Cited P-05.status
 
-5. What's the price of Skyline Towers unit 2201?
+**5. What's the price of Skyline Towers unit 2201?**
 
 *DECLINED NOT GROUNDED
 live mode
@@ -155,7 +155,7 @@ conflicting currency across records, newer record's currency is flagged unreliab
 ⚡ offline · stub
 conflicting currency across records, newer record's currency is flagged unreliable, cannot resolve automatically.
 
-6. What's the price of Horizon Heights unit 1108?
+**6. What's the price of Horizon Heights unit 1108?**
 
 *DECLINED NOT GROUNDED
 live mode
@@ -165,7 +165,7 @@ listing withdrawn from market, price no longer valid to quote.
 ⚡ offline · stub
 listing withdrawn from market, price no longer valid to quote.
 
-7. What's the agent's commission on Seafront Elite unit 501?
+**7. What's the agent's commission on Seafront Elite unit 501?**
 
 *ANSWERED
 live mode
@@ -183,7 +183,7 @@ all extracted claims match cited raw fields or an allowed derivation.
 
 Cited P-11.commission derivation
 
-8. What's the price of Sunset Marina unit 505?
+**8. What's the price of Sunset Marina unit 505?**
 
 *DECLINED NOT GROUNDED
 live mode
@@ -193,7 +193,7 @@ no matching listing record found for this query.
 ⚡ offline · stub
 no matching listing record found for this query.
 
-9. Is Marina Bay Residences unit 1204 a good investment right now?
+**9. Is Marina Bay Residences unit 1204 a good investment right now?**
 
 *DECLINED OUT OF POLICY
 live mode
@@ -203,7 +203,7 @@ question asks for advice or a field not present in the schema.
 ⚡ offline · stub
 question asks for advice or a field not present in the schema.
 
-10. What's the phone number of the agent on Downtown Vista unit 802?
+**10. What's the phone number of the agent on Downtown Vista unit 802?**
 
 *DECLINED OUT OF POLICY
 live mode
@@ -213,7 +213,7 @@ question asks for advice or a field not present in the schema.
 ⚡ offline · stub
 question asks for advice or a field not present in the schema.
 
-11. What's the price of the Marina project's 2-bedroom unit?
+**11. What's the price of the Marina project's 2-bedroom unit?**
 
 *DECLINED NOT GROUNDED
 live mode
@@ -223,7 +223,7 @@ no matching listing record found for this query.
 ⚡ offline · stub
 no matching listing record found for this query.
 
-12. What's the price of Horizon Heights unit 1109?
+**12. What's the price of Horizon Heights unit 1109?**
 
 *ANSWERED
 live mode
