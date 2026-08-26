@@ -54,7 +54,7 @@ It is not invented. R6 prohibits numbers that are not "explicitly present in a c
 
 ## Q4 — What specifically makes your grounding decision deterministic even though the underlying model call may not be? Name every place non-determinism could leak in — model sampling, retrieval order, anything else — and how you closed each one.
 
-**Model sampling** — closed by `temperature: 0` on every live call. The model cannot produce a different token distribution each time.
+**Model sampling** — closed by `temperature: 0` on every live call. However, when using `openrouter/auto`, OpenRouter dynamically routes requests across available underlying models depending on load and free-tier quotas. Because different models have distinct phrasing tendencies and token distributions, strict R5 model sampling determinism across runs is not fully guaranteed in `openrouter/auto` mode. Pinning `OPENROUTER_MODEL` to a specific model ID achieves strict R5 model determinism, but introduces a major operational tradeoff: if that single pinned free model hits rate limits or goes offline, the live system fails to respond to clients. In production, this should be resolved by migrating to a dedicated **paid model API** (or pinned paid endpoint) that provides both guaranteed rate limits and model determinism.
 
 **Retrieval order** — closed by sorting all matched records by id before processing. The same question always produces the same ordered list.
 
@@ -80,7 +80,7 @@ AI did the heavy lifting: the retrieval logic, stub client, live model call, ver
 
 - The "correct it afterwards" half of R7 is not implemented. The HTTP response is already sent by the time a timeout fires — there is no channel to send a correction. In a streaming or WebSocket architecture this would be solvable; in a stateless Next.js route it is not. The timeout is built and the tradeoff is documented.
 - The `/log` page shows raw JSON; a formatted table would be more usable for an agent.
-- The live provider is OpenRouter using `openrouter/auto`. Behaviour with a specific production model is untested.
+- The live provider uses `openrouter/auto` by default. Pinning to a specific paid model endpoint for production to resolve the R5 determinism vs rate-limit tradeoff is planned but requires a paid API subscription.
 
 ## Twelve-question log
 
@@ -194,8 +194,8 @@ Policy violations are caught at retrieval before the model is called. The verifi
 **R4 — Recency resolves conflicts** ✅
 Conflicting records for the same unit are resolved by `updated_at` (most recent wins). Identical timestamps are declined and flagged for human review.
 
-**R5 — Determinism** ✅
-`temperature: 0` on live calls. Retrieval sorted by id. Grounding decision is in the verifier, not the model's text.
+**R5 — Determinism** ⚠️ (Caveat in live mode with `openrouter/auto`)
+`temperature: 0` on live calls. Retrieval sorted by id. Grounding decision is strictly in the verifier. Note: In live mode with `openrouter/auto`, dynamic model routing can vary the underlying model across requests. Pinning to a specific model resolves this to strict determinism, but risks rate-limit outages on free tiers; migrating to a paid model subscription resolves both SLA resilience and strict determinism.
 
 **R6 — No number is ever invented** ✅
 Prices are exact-matched against cited record fields. Commission is only accepted when the full derivation equation appears in the answer and is independently recomputed.

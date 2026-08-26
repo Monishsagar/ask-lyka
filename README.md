@@ -30,6 +30,8 @@ pnpm run questions
 `OPENROUTER_MODEL` defaults to `openrouter/auto` (OpenRouter selects the best free model automatically).
 Swap to any OpenRouter model id via env var alone — no code change needed.
 
+> **Determinism vs. Rate Limiting Tradeoff**: `openrouter/auto` dynamically routes requests to available free models. Because different models have slightly different phrasing habits, full R5 model-level determinism is strictly achieved when `OPENROUTER_MODEL` is pinned to a specific model ID (e.g. `meta-llama/llama-3.3-70b-instruct`). However, pinning to a single free-tier model risks rate-limit failures when that model experiences high traffic. In production environments, this tradeoff is resolved by pinning to a **paid model endpoint** with dedicated rate-limit capacity.
+
 ## Offline fallback
 
 When the deployed app cannot reach the server (e.g. the browser is offline or Vercel is unreachable),
@@ -71,4 +73,4 @@ are skipped and not treated as claims, preventing false `DECLINED_NOT_GROUNDED` 
 - `/log` audit table (in-memory or Supabase)
 - `POST /api/ask` and `GET /api/log`
 
-Determinism is closed by exact matching, sorted retrieval, explicit recency tie declines, and temperature 0 in live mode. The R7 timeout race is intentionally implemented as the one wall-clock leak and is unsafe because it can briefly expose an unverified guess.
+Determinism is closed by exact matching, sorted retrieval, explicit recency tie declines, and temperature 0 in live mode (with model-sampling consistency depending on pinning to a specific model or paid endpoint rather than `openrouter/auto`). The R7 timeout race is intentionally implemented as the one wall-clock leak and is unsafe because it can briefly expose an unverified guess.
